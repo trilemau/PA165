@@ -6,7 +6,7 @@ package cz.muni.fi.pa165.currency;
  *
  * @author petr.adamek@embedit.cz
  */
-public class UnknownExchangeRateException extends RuntimeException {
+public class    UnknownExchangeRateException extends RuntimeException {
 
     /**
      * Constructs an instance of <code>UnsupportedCurrencyException</code> with
