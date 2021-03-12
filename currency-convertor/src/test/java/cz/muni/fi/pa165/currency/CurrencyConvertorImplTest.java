@@ -33,8 +33,8 @@ public class CurrencyConvertorImplTest {
 
     @Test
     public void testConvert() throws ExternalServiceFailureException {
-        when(exchangeRateTableMock.getExchangeRate(EUR, CZK)).thenReturn(new BigDecimal(25));
-        assertEquals(currencyConvertor.convert(EUR, CZK, new BigDecimal(10)), new BigDecimal(250));
+        when(exchangeRateTableMock.getExchangeRate(EUR, CZK)).thenReturn(new BigDecimal("25.99"));
+        assertEquals(currencyConvertor.convert(EUR, CZK, new BigDecimal(222)), new BigDecimal("5769.78"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -44,7 +44,7 @@ public class CurrencyConvertorImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testConvertWithNullTargetCurrency() throws ExternalServiceFailureException {
-        currencyConvertor.convert(EUR, null, new BigDecimal(10));
+        currencyConvertor.convert(EUR, null, new BigDecimal("10"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -55,13 +55,13 @@ public class CurrencyConvertorImplTest {
     @Test(expected = UnknownExchangeRateException.class)
     public void testConvertWithUnknownCurrency() throws ExternalServiceFailureException {
         when(exchangeRateTableMock.getExchangeRate(EUR, CZK)).thenThrow(new UnknownExchangeRateException("unknown currency"));
-        currencyConvertor.convert(EUR, CZK, new BigDecimal(10));
+        currencyConvertor.convert(EUR, CZK, new BigDecimal("10"));
     }
 
-    @Test(expected = ExternalServiceFailureException.class)
+    @Test(expected = UnknownExchangeRateException.class)
     public void testConvertWithExternalServiceFailure() throws ExternalServiceFailureException {
         when(exchangeRateTableMock.getExchangeRate(EUR, CZK)).thenThrow(new ExternalServiceFailureException("exchange rate lookup failed"));
-        currencyConvertor.convert(EUR, CZK, new BigDecimal(10));
+        currencyConvertor.convert(EUR, CZK, new BigDecimal("10"));
     }
 
 }

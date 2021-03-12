@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Currency;
 
 
@@ -22,8 +24,8 @@ public class CurrencyConvertorImpl implements CurrencyConvertor {
     }
 
     @Override
-    public BigDecimal convert(Currency sourceCurrency, Currency targetCurrency, BigDecimal sourceAmount) throws ExternalServiceFailureException {
-        logger.trace("convert() called");
+    public BigDecimal convert(Currency sourceCurrency, Currency targetCurrency, BigDecimal sourceAmount) {
+        logger.trace("convert(sourceCurrency={}, targetCurrency={}, sourceAmount={}) called", sourceCurrency, targetCurrency, sourceAmount);
 
         if (sourceCurrency == null) {
             throw new IllegalArgumentException("sourceCurrency");
@@ -40,15 +42,19 @@ public class CurrencyConvertorImpl implements CurrencyConvertor {
         BigDecimal exchangeRate = null;
         try {
             exchangeRate = exchangeRateTable.getExchangeRate(sourceCurrency, targetCurrency);
-        } catch (UnknownExchangeRateException e) {
-            logger.warn("exchange rate fail");
-            throw e;
+
+            if (exchangeRate == null) {
+                throw new UnknownExchangeRateException("unknown exchange rate");
+            }
+
+            MathContext context = new MathContext(2);
+            return sourceAmount.multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP);
         } catch (ExternalServiceFailureException e) {
             logger.error("exchange rate lookup failed");
-            throw e;
+            throw new UnknownExchangeRateException("exchange rate lookup failed");
+        } catch (Exception e) {
+            logger.warn("exchange rate fail");
+            throw new UnknownExchangeRateException("unknown exchange rate");
         }
-
-        return sourceAmount.multiply(exchangeRate);
     }
-
 }
